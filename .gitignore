@@ -1,0 +1,49 @@
+# Node / Next.js
+node_modules/
+.npm/
+.pnpm-store/
+.next/
+dist/
+build/
+out/
+.turbo/
+*.tsbuildinfo
+coverage/
+coverage-*/ 
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vercel
+.vercel/
+
+# Env files
+.env*
+!.env.example
+
+# OS / Editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Python (for `api/` and utilities)
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+pip-wheel-metadata/
+.eggs/
+*.egg-info
+build/
+dist/
+
+# Misc
+.eslintcache
+plan/
