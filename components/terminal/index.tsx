@@ -9,7 +9,6 @@ import { useThreadId } from '@/hooks/use-thread-id';
 import { useTerminalHistory } from '@/hooks/use-terminal-history';
 import { useBufferedLines } from '@/hooks/use-buffered-lines';
 import { useSpinnerStatus } from '@/hooks/use-spinner-status';
-import { useCaretSelection } from '@/hooks/use-caret-selection';
 import { useChatStream } from '@/hooks/use-chat-stream';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 import { useInputHistory } from '@/hooks/use-input-history';
@@ -21,13 +20,12 @@ export default function Terminal() {
 
   const threadIdRef = useThreadId();
   const { lines, setLines, totalCharsRef } = useTerminalHistory();
-  const { appendText, appendPrefix, appendNewline } = useBufferedLines(lines, setLines, totalCharsRef);
+  const { appendText, appendNewline } = useBufferedLines(lines, setLines, totalCharsRef);
   const [busyForSpinner, setBusyForSpinner] = useState(false);
   const spinner = useSpinnerStatus(busyForSpinner, loadingTexts);
-  const caret = useCaretSelection();
+  // Native input caret only; caret-selection overlay removed
   const { busy, send } = useChatStream({
     appendText,
-    appendPrefix,
     appendNewline,
     setStartedStreaming: spinner.setStartedStreaming,
     threadIdRef,
@@ -49,16 +47,14 @@ export default function Terminal() {
     }
   }, [busy]);
 
-  // Ensure focus returns to input after streaming completes
-  useEffect(() => {
-    if (!busy) requestAnimationFrame(() => caret.inputRef.current?.focus());
-  }, [busy, caret.inputRef]);
+  // Input component manages focus itself when not busy
 
   return (
     <div className="shell">
       <div className="window">
         <Titlebar />
         <div className="term">
+          <div className="term-bg" aria-hidden="true" />
           <Intro />
           <Stream lines={lines} messagesContainerRef={messagesContainerRef} messagesEndRef={messagesEndRef} />
         </div>
@@ -71,8 +67,6 @@ export default function Terminal() {
           startedStreaming={spinner.startedStreaming}
           onSubmit={send}
           inputHistoryApi={inputHistoryApi}
-          refsFromCaretHook={caret}
-          updateCaretAndSelection={caret.updateCaretAndSelection}
         />
       </div>
     </div>

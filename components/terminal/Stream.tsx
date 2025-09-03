@@ -1,6 +1,6 @@
 import type React from 'react';
+import ReactMarkdown from 'react-markdown';
 import type { SerializableLine } from './types';
-import Prefix from './Prefix';
 
 type Props = {
   lines: SerializableLine[];
@@ -25,6 +25,11 @@ export default function Stream({ lines, messagesContainerRef, messagesEndRef }: 
           return null;
         }
         
+        // --- Combine segments into a single string for Markdown rendering ---
+        const messageText = cleanedSegments
+          .filter(segment => typeof segment === 'string')
+          .join('');
+
         // --- Determine CSS classes for styling ------------------------------
         let systemType = '';
         if (line.source === 'system') {
@@ -43,13 +48,13 @@ export default function Stream({ lines, messagesContainerRef, messagesEndRef }: 
         return (
           <div key={lineIndex} className={cssClasses} data-message-type={messageType}>
             <div className="message-content">
-              {cleanedSegments.map((segment, segmentIndex) => (
-                typeof segment === 'string' ? (
-                  <span key={segmentIndex}>{segment}</span>
-                ) : (
-                  <Prefix key={segmentIndex} />
-                )
-              ))}
+              {line.source === 'user' ? (
+                // Render user messages as plain text
+                <span>{messageText}</span>
+              ) : (
+                // Render AI and system messages through Markdown
+                <ReactMarkdown>{messageText}</ReactMarkdown>
+              )}
             </div>
           </div>
         );

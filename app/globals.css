@@ -5,8 +5,8 @@
   --bg: #ffffff;
   --bg1: #f8f9fa;
   --muted: #6c757d;
-  --blue: #007bff;
-  --aqua: #28a745;
+  --blue: #00d0ff;
+  --spring: #62b558;
   --border: #dee2e6;
   --light-blue: #e3f2fd;
   --light-green: #e8f5e8;
@@ -19,6 +19,8 @@
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'MS Sans Serif', sans-serif;
   font-size: 16px;
   line-height: 1.5;
+  position: relative;
+  overflow: hidden;
 }
 
 .window {
@@ -31,8 +33,10 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--bg);
+  backdrop-filter: blur(10px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  z-index: 1;
 }
 
 .titlebar {
@@ -40,7 +44,7 @@
   align-items: center;
   justify-content: center;
   padding: 0 16px;
-  background: var(--blue);
+  background: var(--spring);
   border-bottom: 1px solid var(--border);
   user-select: none;
   font-weight: 600;
@@ -90,7 +94,7 @@
 }
 
 .braille { 
-  color: var(--aqua); 
+  color: var(--spring); 
   font-weight: 800; 
   letter-spacing: 1px; 
   display: inline-block; 
@@ -111,6 +115,27 @@
   .intro-block { 
     padding: 12px 8px 16px 8px; 
   } 
+  
+  .background-image {
+    background-size: cover;
+    background-position: center;
+  }
+}
+
+/* Desktop behavior - better positioning for 9:16 aspect ratio */
+@media (min-width: 769px) {
+  .background-image {
+    background-size: auto 100vh;
+    background-position: center;
+  }
+  
+  /* Alternative: If you want it to cover more area on desktop */
+  @media (min-width: 1200px) {
+    .background-image {
+      background-size: cover;
+      background-position: center;
+    }
+  }
 }
 
 .help { 
@@ -164,7 +189,7 @@
 
 .intro-section strong { 
   font-weight: 700; 
-  color: var(--blue);
+  color: var(--spring);
 }
 
 .intro-section.spaced { 
@@ -190,24 +215,24 @@
   position: absolute; 
   left: 0; 
   top: 0; 
-  color: var(--blue); 
+  color: var(--spring); 
   font-size: 14px;
 }
 
 .intro-link { 
-  color: var(--blue); 
+  color: var(--spring); 
   text-decoration: underline;
   text-underline-offset: 2px;
   font-weight: 500;
 }
 
 .intro-link:hover { 
-  color: var(--aqua); 
-  text-decoration-color: var(--aqua);
+  color: var(--spring); 
+  text-decoration-color: var(--spring);
 }
 
 .intro-link:focus {
-  outline: 2px solid var(--aqua);
+  outline: 2px solid var(--spring);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -225,7 +250,7 @@
 }
 
 .cmd { 
-  color: var(--blue); 
+  color: var(--spring); 
   font-weight: 600; 
   font-size: 16px;
 }
@@ -247,6 +272,7 @@
   overscroll-behavior: contain; 
   font-size: 16px;
   line-height: 1.5;
+  position: relative;
 }
 
 /* Hide scrollbars to prevent double scrollbars */
@@ -257,6 +283,40 @@
 
 .term::-webkit-scrollbar { 
   display: none; 
+}
+
+/* Background image inside the terminal window */
+.term-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/liberty_low_poly_mini.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure content sits above the background */
+.term > *:not(.term-bg) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile: fill and crop for immersive look */
+@media (max-width: 768px) {
+  .term-bg {
+    background-size: cover;
+  }
+}
+
+/* Desktop: right-anchored, tall 9:16 column aesthetic */
+@media (min-width: 769px) {
+  .term-bg {
+    background-size: auto 92%;
+    background-position: center;
+    opacity: 0.10;
+  }
 }
 
 .stream { 
@@ -298,7 +358,7 @@
 }
 
 .message-bubble.ai {
-  background: var(--aqua);
+  background: var(--spring);
   color: white;
   margin-right: auto;
   margin-left: 8px;
@@ -390,7 +450,7 @@
 }
 
 .send-button {
-  background: var(--blue);
+  background: var(--spring);
   color: white;
   border: none;
   border-radius: 50%;
@@ -405,7 +465,7 @@
 }
 
 .send-button:hover:not(:disabled) {
-  background: var(--aqua);
+  background: var(--spring);
   transform: scale(1.05);
 }
 
@@ -420,7 +480,7 @@
 }
 
 .send-button:focus {
-  outline: 2px solid var(--aqua);
+  outline: 2px solid var(--spring);
   outline-offset: 2px;
 }
 
@@ -511,7 +571,7 @@
   color: var(--fg); 
   text-align: center; 
   line-height: 1.2; 
-  background-image: linear-gradient(45deg, var(--blue), var(--aqua)); 
+  background-image: linear-gradient(45deg, var(--blue), var(--spring)); 
   -webkit-background-clip: text; 
   background-clip: text; 
   color: transparent; 
@@ -532,7 +592,7 @@
     color: var(--fg); 
     text-align: center; 
     line-height: 1.2; 
-    background-image: linear-gradient(45deg, var(--blue), var(--aqua)); 
+    background-image: linear-gradient(45deg, var(--blue), var(--spring)); 
     -webkit-background-clip: text; 
     background-clip: text; 
     color: transparent; 

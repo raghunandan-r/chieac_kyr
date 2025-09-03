@@ -1,6 +1,4 @@
-# chieac.fyi
-
-TUI inspired front end for my personal portfolio. 
+# chieac.know_your_rights
 
 ## Architecture
 
@@ -32,11 +30,3 @@ The application now implements a robust, fault-tolerant streaming architecture u
 - DRY terminal: reuse icons, keep CSS local to the component, extract large constants if helpful.
 - **Durable streaming**: No data loss on network interruptions or client disconnections.
 - **Fault tolerance**: Automatic recovery from backend failures and connection drops.
-
-## Learn More
-
-To learn more about the AI SDK or Next.js by Vercel, take a look at the following resources:
-
-- [AI SDK Documentation](https://sdk.vercel.ai/docs)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [your website should be under 14kb in size](https://endtimes.dev/why-your-website-should-be-under-14kb-in-size/)

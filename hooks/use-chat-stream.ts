@@ -5,13 +5,12 @@ const STREAM_TIMEOUT_MS = 15000; // 15 seconds
 
 type SendDeps = {
   appendText: (source: MessageSource, t: string) => void;
-  appendPrefix: () => void;
   appendNewline: (source: MessageSource) => void;
   setStartedStreaming: (v: boolean) => void;
   threadIdRef: React.MutableRefObject<string | null>;
 };
 
-export function useChatStream({ appendText, appendPrefix, appendNewline, setStartedStreaming, threadIdRef }: SendDeps) {
+export function useChatStream({ appendText, appendNewline, setStartedStreaming, threadIdRef }: SendDeps) {
   const [busy, setBusy] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
   const timeoutRef = useRef<number | null>(null);
@@ -53,10 +52,7 @@ export function useChatStream({ appendText, appendPrefix, appendNewline, setStar
       if (!streamStarted && value) {
         streamStarted = true;
         setStartedStreaming(true);
-        // Only add the prompt prefix on the initial message, not on recovery.
-        if (!isRecovery) {
-          appendPrefix();
-        }
+        // No prefix rendering on the client
       }
 
       if (done) {
@@ -124,7 +120,7 @@ export function useChatStream({ appendText, appendPrefix, appendNewline, setStar
    * @param threadId The ID of the chat thread to recover.
    */
   async function recoverStream(streamId: string) {
-    appendText('system', '\n... ');
+    appendText('ai', ' ... ');
     
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -157,14 +153,16 @@ export function useChatStream({ appendText, appendPrefix, appendNewline, setStar
 
 
   async function send(msg: string) {
+    if (controllerRef.current) return;
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
     setBusy(true);
     setStartedStreaming(false);
     appendNewline('user');
     appendText('user', `> ${msg}`);
     appendNewline('ai');
 
-    const controller = new AbortController();
-    controllerRef.current = controller;
 
     // Start the watchdog timer. It will be reset each time data arrives.
     resetTimeout();

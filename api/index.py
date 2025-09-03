@@ -101,7 +101,7 @@ async def trigger_stream_generation(thread_id: str, stream_id: str, chat_request
     }
     
     # The backend needs both the thread_id for history and a unique stream_id for the Redis key.
-    backend_request = {**chat_request, "thread_id": thread_id, "stream_id": stream_id}
+    backend_request = {**chat_request, "thread_id": thread_id, "stream_id": stream_id, "query_type": "immi"}
     
     logger.info("Triggering stream generation on backend", extra={"thread_id": thread_id, "stream_id": stream_id, "request": chat_request})
 
@@ -319,8 +319,8 @@ async def handle_chat_data(fastapi_request: FastAPIRequest):
     try:    
         await trigger_stream_generation(thread_id, stream_id, backend_request)
     except HTTPException as e:
-        async def error_stream():
-            yield f"data: [Backend service unavailable]:{e.detail}\n\n"
+        async def error_stream(exception):
+            yield f"data: [Backend service unavailable]:{exception.detail}\n\n"
             yield "data: [END_OF_STREAM]\n\n"
 
         return StreamingResponse(

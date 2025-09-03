@@ -4,9 +4,13 @@ export const spinnerFrames = ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','�
 
 export const loadingTexts = [
   'Thinking...',
+  'Pensando...',
   'Retrieving info...',
+  'Recuperando...',
   'Processing...',
+  'Procesando...',
   'Evaluating...',
+  'Evaluando...',
 ];
 
 export const LOCALSTORAGE_KEYS = {

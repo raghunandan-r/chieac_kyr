@@ -24,6 +24,7 @@ export function useBufferedLines(
     setLines(currentLines => {
       const newLines = [...currentLines];
       let currentLine: SerializableLine | undefined = newLines[newLines.length - 1];
+      let isLineCloned = false; // Add a flag to prevent multiple clones of the same line
 
       for (const item of pending) {
         const { source, node } = item;
@@ -32,11 +33,18 @@ export function useBufferedLines(
           // Prefix always starts a new AI line
           currentLine = { source: 'ai', segments: [{ type: 'prefix' }] };
           newLines.push(currentLine);
+          isLineCloned = true;
         } else if (node.type === 'text') {
           // If source changed or no current line, start a new one
           if (!currentLine || currentLine.source !== source) {
             currentLine = { source, segments: [] };
             newLines.push(currentLine);
+            isLineCloned = true; // New lines don't need cloning
+          } else if (!isLineCloned) {
+            // Before mutating the last line, create a deep copy of it
+            currentLine = { ...currentLine, segments: [...currentLine.segments] };
+            newLines[newLines.length - 1] = currentLine;
+            isLineCloned = true; // Mark as cloned for this flush cycle
           }
 
           const parts = node.value.split('\n');
@@ -47,6 +55,7 @@ export function useBufferedLines(
           for (let i = 1; i < parts.length; i++) {
             currentLine = { source, segments: [] };
             newLines.push(currentLine);
+            isLineCloned = true; // New lines don't need cloning
             if (parts[i]) {
               currentLine.segments.push(parts[i]);
               totalCharsRef.current += parts[i].length;
@@ -55,6 +64,7 @@ export function useBufferedLines(
         } else if (node.type === 'newline') {
           currentLine = { source, segments: [] };
           newLines.push(currentLine);
+          isLineCloned = true; // New lines don't need cloning
         }
       }
 
@@ -78,7 +88,8 @@ export function useBufferedLines(
   };
   
   const appendText = (source: MessageSource, text: string) => append(source, { type: 'text', value: text });
-  const appendPrefix = () => append('ai', { type: 'prefix' });
+  // Prefix nodes are removed from rendering; keep API for compatibility but no-op
+  const appendPrefix = () => {};
   const appendNewline = (source: MessageSource) => append(source, { type: 'newline' });
   const clear = () => {
     setLines([]);
