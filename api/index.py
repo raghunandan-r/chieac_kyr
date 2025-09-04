@@ -165,6 +165,9 @@ async def consume_stream_from_redis(stream_id: str):
             has_data = (response and len(response) > 0 and 
                        len(response[0]) >= 2 and response[0][1] and len(response[0][1]) > 0)
             
+            if has_data:
+                start_time = datetime.datetime.now()
+                
             if not has_data:
                 if last_processed_id == "0-0":
                     # No pending messages, switch to listening for new ones

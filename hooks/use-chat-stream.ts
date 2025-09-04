@@ -25,7 +25,7 @@ export function useChatStream({ appendText, appendNewline, setStartedStreaming, 
     }
     timeoutRef.current = window.setTimeout(() => {
       if (controllerRef.current) {
-        console.log(`Client timeout: No data received for ${STREAM_TIMEOUT_MS}ms.`);
+        // console.log(`Client timeout: No data received for ${STREAM_TIMEOUT_MS}ms.`);
         controllerRef.current.abort('timeout');
       }
     }, STREAM_TIMEOUT_MS);
@@ -77,7 +77,9 @@ export function useChatStream({ appendText, appendNewline, setStartedStreaming, 
         if (line.startsWith('data:')) {
           try {
             const chunk = String(line.slice(6));
-            if (chunk) {
+            const isBlank = chunk.trim() === '';
+            if (!isBlank && chunk) {
+              // console.log('[SSE] action appendText:', JSON.stringify(chunk));
               // Add graceful error handling here
               if (chunk.startsWith('[Error:')) {
                 // Handle backend validation errors (e.g., malicious content)
@@ -104,7 +106,12 @@ export function useChatStream({ appendText, appendNewline, setStartedStreaming, 
               } else {
                 // Regular content - display normally
                 appendText('ai', chunk);
-              }
+              }              
+            }
+            else {
+              // An empty or whitespace-only chunk signals a paragraph break.
+              console.debug('[SSE] Blank chunk -> newline');
+              appendNewline('ai');
             }      
           } catch {
             // ignore bad chunk

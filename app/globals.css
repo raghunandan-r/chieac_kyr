@@ -601,4 +601,18 @@
   } 
 }
 
+.message-bubble .message-content ul,
+.message-bubble .message-content ol {
+  margin: 8px 0 8px 18px;
+  padding: 0;
+}
+
+.message-bubble .message-content li { margin: 4px 0; }
+
+.message-bubble .message-content a {
+  color: inherit;            /* stays readable in bubbles */
+  text-decoration: underline;
+  word-break: break-word;    /* long URLs wrap */
+}
+
 

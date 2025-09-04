@@ -12,14 +12,20 @@ import { useSpinnerStatus } from '@/hooks/use-spinner-status';
 import { useChatStream } from '@/hooks/use-chat-stream';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 import { useInputHistory } from '@/hooks/use-input-history';
+import { useLayoutEffect, useRef } from 'react';
+
 
 export default function Terminal() {
-  const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
+  
   const [input, setInput] = useState('');
   const [spinnerChar, setSpinnerChar] = useState(spinnerFrames[0]);
 
   const threadIdRef = useThreadId();
   const { lines, setLines, totalCharsRef } = useTerminalHistory();
+  // ↓ reference changes every time because we *always* create a new array:
+  const safeLines = [...lines];           // one-liner guarantee
+  const containerRef = useScrollToBottom<HTMLDivElement>(safeLines);
+
   const { appendText, appendNewline } = useBufferedLines(lines, setLines, totalCharsRef);
   const [busyForSpinner, setBusyForSpinner] = useState(false);
   const spinner = useSpinnerStatus(busyForSpinner, loadingTexts);
@@ -53,10 +59,10 @@ export default function Terminal() {
     <div className="shell">
       <div className="window">
         <Titlebar />
-        <div className="term">
+        <div className="term" ref={containerRef}>
           <div className="term-bg" aria-hidden="true" />
           <Intro />
-          <Stream lines={lines} messagesContainerRef={messagesContainerRef} messagesEndRef={messagesEndRef} />
+          <Stream lines={safeLines} />
         </div>
         <InputBar
           input={input}

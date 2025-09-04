@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from "@vercel/speed-insights/next"
-export const metadata = { title: 'Chat with chieac', description: 'Chat with Assistant AI' };
+export const metadata = { title: 'Know Your Rights with CHIEAC', description: 'Know Your Rights' };
 import './globals.css';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

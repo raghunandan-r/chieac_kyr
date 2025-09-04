@@ -1,17 +1,49 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef, useEffect } from 'react';
 
-export function useScrollToBottom<T extends HTMLElement>(): [
-  React.RefObject<T>,
-  React.RefObject<HTMLDivElement>
-] {
+export function useScrollToBottom<T extends HTMLElement>(
+  dependency: any
+): React.RefObject<T> {
   const containerRef = useRef<T>(null);
-  const endRef = useRef<HTMLDivElement>(null);
+  const isScrolledToBottomRef = useRef(true);
+  const lastStickStateRef = useRef<boolean | null>(null);
+  const lastDependencyRef = useRef(dependency);
 
-  useEffect(() => {
-    if (endRef.current) {
-      endRef.current.scrollIntoView({ behavior: 'smooth' });
+  // Track scroll position
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      const handleScroll = () => {
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        const atBottom = scrollHeight - scrollTop - clientHeight <= 1;
+        if (lastStickStateRef.current !== atBottom) {
+          // console.log(`[ScrollHook] user ${atBottom ? 'reached' : 'left'} bottom`);
+          lastStickStateRef.current = atBottom;
+        }
+        isScrolledToBottomRef.current = atBottom;
+      };
+      container.addEventListener('scroll', handleScroll);
+      handleScroll(); // Initial check on mount
+      return () => container.removeEventListener('scroll', handleScroll);
     }
-  });
+  }, []);
 
-  return [containerRef, endRef];
+  // Auto-scroll when dependency changes
+  useEffect(() => {
+    if (dependency === lastDependencyRef.current) return;
+    lastDependencyRef.current = dependency;
+
+    const container = containerRef.current;
+    if (!isScrolledToBottomRef.current || !container) return;
+
+    // Wait one frame for paint
+    requestAnimationFrame(() => {
+      if (isScrolledToBottomRef.current && container) {
+        const size = Array.isArray(dependency) ? dependency.length : undefined;
+        // console.log('[ScrollHook] auto-scroll after update', size !== undefined ? `lines: ${size}` : '');
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+      }
+    });
+  }, [dependency]);
+
+  return containerRef;
 }

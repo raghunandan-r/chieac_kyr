@@ -62,11 +62,18 @@ export function useBufferedLines(
             }
           }
         } else if (node.type === 'newline') {
-          currentLine = { source, segments: [] };
-          newLines.push(currentLine);
-          isLineCloned = true; // New lines don't need cloning
-        }
+          // console.log('[BUFFER] FLUSH newline before push');
+
+             // Push a truly blank line …
+             newLines.push({ source, segments: [] });
+             // … and forget it so that the next text token starts its own line.
+             currentLine = undefined;
+             isLineCloned = false;
+           }
       }
+
+      // (Debug) Uncomment the line below to inspect buffered lines
+      // console.log('[BUFFER] lines after flush:', newLines.map(l => ({ txt: l.segments.join(''), segments: l.segments })));
 
       while (totalCharsRef.current > BUFFER_CAP && newLines.length > 1) {
         const removedLine = newLines.shift()!;
@@ -75,7 +82,6 @@ export function useBufferedLines(
         }, 0);
         totalCharsRef.current -= removedChars;
       }
-
       return newLines;
     });
 
@@ -83,6 +89,8 @@ export function useBufferedLines(
   };
 
   const append = (source: MessageSource, node: PendingNode) => {
+    // console.log('[BUFFER] queued:', node);
+
     pendingItemsRef.current.push({ source, node });
     flush();
   };
