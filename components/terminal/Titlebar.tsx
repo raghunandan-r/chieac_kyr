@@ -5,14 +5,12 @@ export default function Titlebar() {
     <div className="titlebar">
       <nav className="nav">
         <a href="https://chieac.org/" target="_blank" className="social-link" rel="noreferrer">
-          <ChieacIcon />
-          CHIEAC
+          <ChieacIcon />          
         </a>
       </nav>
       <nav className="nav">
         <a href="http://immigrantjustice.org/" target="_blank" className="social-link" rel="noreferrer">
-          <ImmigrantJusticeIcon />
-          Immigrant Justice
+          <ImmigrantJusticeIcon />          
         </a>
       </nav>
     </div>

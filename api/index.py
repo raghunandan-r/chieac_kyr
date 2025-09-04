@@ -12,6 +12,7 @@ from upstash_redis import Redis as SyncRedis
 from upstash_ratelimit import Ratelimit, SlidingWindow
 from utils.logger import logger
 from starlette.concurrency import run_in_threadpool
+from starlette.background import BackgroundTask
 
 # Load environment variables from .env file
 load_dotenv()
@@ -167,7 +168,7 @@ async def consume_stream_from_redis(stream_id: str):
             
             if has_data:
                 start_time = datetime.datetime.now()
-                
+
             if not has_data:
                 if last_processed_id == "0-0":
                     # No pending messages, switch to listening for new ones
@@ -231,7 +232,9 @@ async def consume_stream_from_redis(stream_id: str):
                 chunk = data.get('chunk')
                 if chunk == "[END_OF_STREAM]":
                     logger.info("End of stream marker received from Redis", extra={"stream_id": stream_id})
-                    await redis.execute(["XACK", stream_key, group_name, message_id])
+                    
+                    yield b"data: [END_OF_STREAM]\n\n"
+                    await redis.execute(["XACK", stream_key, group_name, message_id])                    
                     return
             
                 if chunk:
@@ -340,14 +343,15 @@ async def handle_chat_data(fastapi_request: FastAPIRequest):
     #    and includes the stream_id in a header for client-side recovery.
     headers = {
         'Cache-Control': 'no-cache, no-transform',
-        'Connection': 'keep-alive',
+        'Connection': 'close',
         'X-Accel-Buffering': 'no',
         'X-Stream-Id': stream_id # Custom header to send the ID to the client
     }
     return StreamingResponse(
         consume_stream_from_redis(stream_id),
         media_type='text/event-stream',
-        headers=headers
+        headers=headers,
+        background=BackgroundTask(lambda: logger.info("response finished"))
     )
 
 @app.get("/api/recover/{stream_id}")

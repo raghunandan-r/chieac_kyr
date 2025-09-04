@@ -41,6 +41,12 @@ export function useChatStream({ appendText, appendNewline, setStartedStreaming, 
     reader: ReadableStreamDefaultReader<Uint8Array>,
     isRecovery = false
   ) {
+    
+    const t0 = Date.now();
+    function log(label: string) {
+      console.debug(`${label} at +${Date.now() - t0}ms`);
+    }
+    
     const decoder = new TextDecoder();
     let buf = '';
     let streamStarted = false;

@@ -36,9 +36,9 @@ else:
             "continuous_profiling_auto_start": True,        
         },
     )
+    sentry_sdk.set_tag("project", "chieac-kyr-frontend")
     
     logger = logging.getLogger()  # Root logger
-    logger.error("SENTRY TEST: This error should appear in Issues")
     logger.info("SENTRY TEST: This info should appear somewhere")
 
 
