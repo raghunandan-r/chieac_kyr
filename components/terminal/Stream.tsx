@@ -52,8 +52,15 @@ export default function Stream({ lines }: Props) {
         const needsSpace = current.text && !/\s$/.test(current.text) && !isPunctuationOrMarker;
         
         if (needsSpace) {
-          current.text += ' ';
+          current.text += '\n';
         }
+        
+        // new condition to handle list markers after dots or colons.
+        const endsWithPunctuation = /[.:]$/.test(current.text.trim());
+        if ( isListMarker && (!/\n\n$/.test(current.text) || endsWithPunctuation)) {
+          current.text += '\n\n';
+        }
+
         current.text += lineText;
       }
     } else {
