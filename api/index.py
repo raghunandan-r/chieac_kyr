@@ -107,7 +107,8 @@ async def trigger_stream_generation(thread_id: str, stream_id: str, chat_request
     logger.info("Triggering stream generation on backend", extra={"thread_id": thread_id, "stream_id": stream_id, "request": chat_request})
 
     try:
-        async with httpx.AsyncClient() as client:
+        transport = httpx.AsyncHTTPTransport(retries=3)
+        async with httpx.AsyncClient(transport=transport) as client:
             response = await client.post(backend_url, json=backend_request, headers=headers, timeout=10)
             response.raise_for_status()
     except httpx.RequestError as e:
@@ -241,12 +242,13 @@ async def consume_stream_from_redis(stream_id: str):
                                         
                     # This is the key SSE formatting fix.
                     # It must be `data: ...` and end with two newlines.
-                    message_data = chunk
-                    if not isinstance(message_data, str):
-                        message_data = message_data.decode('utf-8')
-                    
-                    sse_message = f"data: {message_data}\n\n"
-                    yield sse_message.encode('utf-8')
+                    message_data = chunk if isinstance(chunk, str) else chunk.decode('utf-8')
+
+                    # Emit SSE data correctly for multi-line payloads
+                    for part in message_data.splitlines():
+                        yield f"data: {part}\n".encode('utf-8')
+                    # Blank line terminates the SSE event
+                    yield b"\n"
 
                 # Acknowledge the message *after* we have successfully yielded it to the client.
                 await redis.execute(["XACK", stream_key, group_name, message_id])

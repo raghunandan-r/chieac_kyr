@@ -26,10 +26,10 @@ else:
             # ADD THIS: LoggingIntegration for capturing logs
             LoggingIntegration(
                 level=logging.INFO,        # Capture INFO+ as breadcrumbs
-                event_level=logging.INFO,  # Send INFO+ as events to Sentry
+                event_level=logging.ERROR,  # Send INFO+ as events to Sentry
             ),
         ],
-        send_default_pii=True,
+        send_default_pii=False,
         # Enable logs to be sent to Sentry
         enable_logs=True,
         _experiments={
@@ -39,7 +39,7 @@ else:
     sentry_sdk.set_tag("project", "chieac-kyr-frontend")
     
     logger = logging.getLogger()  # Root logger
-    logger.info("SENTRY TEST: This info should appear somewhere")
+    logger.info("SENTRY frontendTEST: This info should appear somewhere")
 
 
 class CustomJsonFormatter(jsonlogger.JsonFormatter):
